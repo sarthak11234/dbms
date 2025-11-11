@@ -1,3 +1,39 @@
+queries used:
+
+CREATE DATABASE BankTransactionDB;
+
+USE BankTransactionDB;
+
+CREATE TABLE Customer (CustomerID INT PRIMARY KEY AUTO_INCREMENT, Name VARCHAR(100) NOT NULL, Address VARCHAR(200), Phone VARCHAR(15) UNIQUE NOT NULL, Email VARCHAR(100) UNIQUE NOT NULL);
+
+CREATE TABLE Account (AccountID INT PRIMARY KEY AUTO_INCREMENT, CustomerID INT NOT NULL, AccountType VARCHAR(30) CHECK (AccountType IN ('Savings', 'Current', 'Fixed Deposit')), Balance DECIMAL(12,2) DEFAULT 0.00 CHECK (Balance >= 0), CreatedDate DATE DEFAULT (CURRENT_DATE), FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID) ON DELETE CASCADE ON UPDATE CASCADE);
+
+CREATE TABLE Transaction (TransactionID INT PRIMARY KEY AUTO_INCREMENT, AccountID INT NOT NULL, TransactionType VARCHAR(10) CHECK (TransactionType IN ('Credit', 'Debit')), Amount DECIMAL(12,2) CHECK (Amount > 0), TransactionDate DATE DEFAULT (CURRENT_DATE), FOREIGN KEY (AccountID) REFERENCES Account(AccountID) ON DELETE CASCADE ON UPDATE CASCADE);
+
+CREATE VIEW CustomerAccountBalance AS SELECT c.Name AS CustomerName, a.AccountID, a.Balance AS CurrentBalance FROM Customer c JOIN Account a ON c.CustomerID = a.CustomerID;
+
+SELECT * FROM CustomerAccountBalance;
+
+CREATE INDEX idx_TransactionDate ON Transaction(TransactionDate);
+
+SHOW TABLES;
+
+DESCRIBE Customer;
+
+DESCRIBE Account;
+
+DESCRIBE Transaction;
+
+SELECT * FROM CustomerAccountBalance;
+
+SHOW INDEX FROM Transaction;
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 Enter password: ****
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 13
@@ -125,3 +161,4 @@ mysql> SHOW INDEX FROM Transaction;
 | transaction |          1 | idx_TransactionDate |            1 | TransactionDate | A         |           0 |     NULL |   NULL | YES  | BTREE      |         |               | YES     | NULL       |
 +-------------+------------+---------------------+--------------+-----------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
 3 rows in set (0.02 sec)
+

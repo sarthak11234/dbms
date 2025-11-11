@@ -1,3 +1,50 @@
+commands udes:
+
+CREATE DATABASE SalesDB;
+
+USE SalesDB;
+
+CREATE TABLE Customer (customer_id INT PRIMARY KEY AUTO_INCREMENT, customer_name VARCHAR(100) NOT NULL, city VARCHAR(50), email VARCHAR(100) UNIQUE NOT NULL);
+
+CREATE TABLE Product (product_id INT PRIMARY KEY AUTO_INCREMENT, product_name VARCHAR(100) NOT NULL, category VARCHAR(50), price DECIMAL(10,2) CHECK (price > 0));
+
+CREATE TABLE Sale (sale_id INT PRIMARY KEY AUTO_INCREMENT, customer_id INT NOT NULL, product_id INT NOT NULL, quantity INT CHECK (quantity > 0), sale_date DATE DEFAULT (CURRENT_DATE), total_amount DECIMAL(12,2) CHECK (total_amount >= 0), FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY (product_id) REFERENCES Product(product_id) ON DELETE CASCADE ON UPDATE CASCADE);
+
+INSERT INTO Customer (customer_name, city, email) VALUES ('Asha Patil', 'Mumbai', 'asha@sales.test'), ('Rahul Deshmukh', 'Pune', 'rahul@sales.test'), ('Priya Kulkarni', 'Nagpur', 'priya@sales.test'), ('Vikram Joshi', 'Mumbai', 'vikram@sales.test');
+
+INSERT INTO Product (product_name, category, price) VALUES ('Laptop', 'Electronics', 55000.00), ('Mobile', 'Electronics', 25000.00), ('Chair', 'Furniture', 4500.00), ('Table', 'Furniture', 7000.00), ('Shoes', 'Fashion', 3000.00);
+
+INSERT INTO Sale (customer_id, product_id, quantity, sale_date, total_amount) VALUES (1, 1, 1, '2025-09-10', 55000.00), (1, 5, 2, '2025-09-20', 6000.00), (2, 2, 1, '2025-09-15', 25000.00), (3, 3, 3, '2025-09-22', 13500.00), (4, 1, 1, '2025-09-25', 55000.00), (4, 4, 1, '2025-09-28', 7000.00), (2, 5, 2, '2025-10-02', 6000.00);
+
+SELECT c.customer_name, SUM(s.total_amount) AS TotalSales FROM Customer c JOIN Sale s ON c.customer_id = s.customer_id GROUP BY c.customer_name;
+
+SELECT p.product_name, SUM(s.quantity) AS TotalQuantitySold FROM Product p JOIN Sale s ON p.product_id = s.product_id GROUP BY p.product_name;
+
+SELECT MAX(price) AS HighestPrice, MIN(price) AS LowestPrice FROM Product;
+
+SELECT c.city, AVG(s.total_amount) AS AvgSales FROM Customer c JOIN Sale s ON c.customer_id = s.customer_id GROUP BY c.city;
+
+SELECT p.category, SUM(s.total_amount) AS TotalSales, COUNT(s.sale_id) AS TransactionCount FROM Product p JOIN Sale s ON p.product_id = s.product_id GROUP BY p.category;
+
+SELECT c.customer_name, SUM(s.total_amount) AS TotalPurchase FROM Customer c JOIN Sale s ON c.customer_id = s.customer_id GROUP BY c.customer_name HAVING SUM(s.total_amount) > (SELECT AVG(total_amount) FROM Sale);
+
+CREATE TEMPORARY TABLE CustomerSalesSummary AS SELECT customer_id, SUM(total_amount) AS TotalSales FROM Sale GROUP BY customer_id;
+
+SELECT c.customer_name, s.TotalSales FROM Customer c JOIN CustomerSalesSummary s ON c.customer_id = s.customer_id WHERE s.TotalSales > 10000;
+
+SELECT p.product_name, COUNT(s.sale_id) AS TimesSold FROM Product p LEFT JOIN Sale s ON p.product_id = s.product_id GROUP BY p.product_name;
+
+SELECT DISTINCT c.customer_name FROM Customer c WHERE c.customer_id IN (SELECT s.customer_id FROM Sale s JOIN Product p ON s.product_id = p.product_id WHERE p.category = 'Electronics');
+
+SELECT * FROM Customer;
+
+SELECT * FROM Product;
+
+SELECT * FROM Sale;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 Enter password: ****
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 15
@@ -286,5 +333,6 @@ mysql> SELECT * FROM Sale;
 |       7 |           2 |          5 |        2 | 2025-10-02 |      6000.00 |
 +---------+-------------+------------+----------+------------+--------------+
 7 rows in set (0.00 sec)
+
 
 mysql>

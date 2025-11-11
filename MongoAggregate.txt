@@ -1,0 +1,305 @@
+Microsoft Windows [Version 10.0.26100.6899]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\sarth>mongosh
+Current Mongosh Log ID: 69134601d13509f056b5f898
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.0
+Using MongoDB:          8.0.8
+Using Mongosh:          2.5.0
+mongosh 2.5.9 is available for download: https://www.mongodb.com/try/download/shell
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-11-11T14:17:05.879+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+test> use libraryDB
+... db.createCollection("books")
+...
+switched to db libraryDB
+libraryDB> db.books.insertMany([
+...   {
+...     title: "mongodb overview",
+...     description: "Introduction to MongoDB",
+...     by: "john",
+...     url: "https://mongodb.com",
+...     tags: ["database", "NoSQL"],
+...     likes: 120
+...   },
+...   {
+...     title: "nodejs basics",
+...     description: "Node.js tutorial for beginners",
+...     by: "john",
+...     url: "https://nodejs.org",
+...     tags: ["JavaScript", "backend"],
+...     likes: 45
+...   },
+...   {
+...     title: "express guide",
+...     description: "Learn Express.js for backend apps",
+...     by: "mike",
+...     url: "https://expressjs.com",
+...     tags: ["framework", "Node.js"],
+...     likes: 15
+...   },
+...   {
+...     title: "mongodb advanced",
+...     description: "Deep dive into MongoDB features",
+...     by: "john",
+...     url: "https://mongodb.com/advanced",
+...     tags: ["NoSQL", "database"],
+...     likes: 5
+...   },
+...   {
+...     title: "react tutorial",
+...     description: "Frontend development using React",
+...     by: "emma",
+...     url: "https://reactjs.org",
+...     tags: ["frontend", "JavaScript"],
+...     likes: 180
+...   },
+...   {
+...     title: "angular guide",
+...     description: "Angular step-by-step guide",
+...     by: "john",
+...     url: "https://angular.io",
+...     tags: ["frontend", "JavaScript"],
+...     likes: 250
+...   }
+... ])
+...
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6913464bd13509f056b5f899'),
+    '1': ObjectId('6913464bd13509f056b5f89a'),
+    '2': ObjectId('6913464bd13509f056b5f89b'),
+    '3': ObjectId('6913464bd13509f056b5f89c'),
+    '4': ObjectId('6913464bd13509f056b5f89d'),
+    '5': ObjectId('6913464bd13509f056b5f89e')
+  }
+}
+libraryDB> db.books.aggregate([
+...   { $match: { by: "john" } },
+...   { $count: "Number_of_books_by_john" }
+... ])
+...
+[ { Number_of_books_by_john: 7 } ]
+libraryDB> db.books.aggregate([
+...   { $match: { by: "john" } },
+...   {
+...     $group: {
+...       _id: "$by",
+...       minLikes: { $min: "$likes" },
+...       maxLikes: { $max: "$likes" }
+...     }
+...   }
+... ])
+...
+[ { _id: 'john', minLikes: 5, maxLikes: 250 } ]
+libraryDB> db.books.aggregate([
+...   { $match: { by: "john" } },
+...   {
+...     $group: {
+...       _id: "$by",
+...       avgLikes: { $avg: "$likes" }
+...     }
+...   }
+... ])
+...
+[ { _id: 'john', avgLikes: 92.14285714285714 } ]
+libraryDB> db.books.aggregate([
+...   { $match: { by: "john" } },
+...   { $sort: { title: 1 } },
+...   {
+...     $group: {
+...       _id: "$by",
+...       firstBook: { $first: "$title" },
+...       lastBook: { $last: "$title" }
+...     }
+...   }
+... ])
+...
+[
+  {
+    _id: 'john',
+    firstBook: 'angular guide',
+    lastBook: 'nodejs basics'
+  }
+]
+libraryDB> db.books.createIndex({ by: 1 })
+by_1
+libraryDB> db.books.find({ by: "john" })
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb overview',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  },
+  {
+    _id: ObjectId('691345261d8d692dc2b5f89e'),
+    title: 'mongodb advanced',
+    description: 'Deep dive into MongoDB features',
+    by: 'john',
+    url: 'https://mongodb.com/advanced',
+    tags: [ 'database', 'NoSQL' ],
+    likes: 90,
+    username: 'sarthak',
+    comments: 'Very useful resource for learning advanced MongoDB'
+  },
+  {
+    _id: ObjectId('6913464bd13509f056b5f899'),
+    title: 'mongodb overview',
+    description: 'Introduction to MongoDB',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('6913464bd13509f056b5f89a'),
+    title: 'nodejs basics',
+    description: 'Node.js tutorial for beginners',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 45
+  },
+  {
+    _id: ObjectId('6913464bd13509f056b5f89c'),
+    title: 'mongodb advanced',
+    description: 'Deep dive into MongoDB features',
+    by: 'john',
+    url: 'https://mongodb.com/advanced',
+    tags: [ 'NoSQL', 'database' ],
+    likes: 5
+  },
+  {
+    _id: ObjectId('6913464bd13509f056b5f89e'),
+    title: 'angular guide',
+    description: 'Angular step-by-step guide',
+    by: 'john',
+    url: 'https://angular.io',
+    tags: [ 'frontend', 'JavaScript' ],
+    likes: 250
+  }
+]
+libraryDB> db.books.find({ by: "john" }).explain("executionStats")
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'libraryDB.books',
+    parsedQuery: { by: { '$eq': 'john' } },
+    indexFilterSet: false,
+    queryHash: '5803FC00',
+    planCacheShapeHash: '5803FC00',
+    planCacheKey: 'A64D0374',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        keyPattern: { by: 1 },
+        indexName: 'by_1',
+        isMultiKey: false,
+        multiKeyPaths: { by: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { by: [ '["john", "john"]' ] }
+      }
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 7,
+    executionTimeMillis: 3,
+    totalKeysExamined: 7,
+    totalDocsExamined: 7,
+    executionStages: {
+      isCached: false,
+      stage: 'FETCH',
+      nReturned: 7,
+      executionTimeMillisEstimate: 0,
+      works: 8,
+      advanced: 7,
+      needTime: 0,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      docsExamined: 7,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        nReturned: 7,
+        executionTimeMillisEstimate: 0,
+        works: 8,
+        advanced: 7,
+        needTime: 0,
+        needYield: 0,
+        saveState: 0,
+        restoreState: 0,
+        isEOF: 1,
+        keyPattern: { by: 1 },
+        indexName: 'by_1',
+        isMultiKey: false,
+        multiKeyPaths: { by: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { by: [ '["john", "john"]' ] },
+        keysExamined: 7,
+        seeks: 1,
+        dupsTested: 0,
+        dupsDropped: 0
+      }
+    }
+  },
+  queryShapeHash: 'C3930EA0724845105ADED06754C98524888B3DEC62C07E045949DD1EC9C65E73',
+  command: { find: 'books', filter: { by: 'john' }, '$db': 'libraryDB' },
+  serverInfo: {
+    host: 'Sarthak',
+    port: 27017,
+    version: '8.0.8',
+    gitVersion: '7f52660c14217ed2c8d3240f823a2291a4fe6abd'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}

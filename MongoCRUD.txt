@@ -1,0 +1,314 @@
+Microsoft Windows [Version 10.0.26100.6899]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\sarth>mongosh
+Current Mongosh Log ID: 691344df1d8d692dc2b5f898
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.0
+Using MongoDB:          8.0.8
+Using Mongosh:          2.5.0
+mongosh 2.5.9 is available for download: https://www.mongodb.com/try/download/shell
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-11-11T14:17:05.879+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+test> use libraryDB
+switched to db libraryDB
+libraryDB> db.createCollection("books")
+{ ok: 1 }
+libraryDB> db.books.insertMany([
+...   {
+...     title: "mongodb",
+...     description: "Database for modern apps",
+...     by: "john",
+...     url: "https://mongodb.com",
+...     tags: ["database", "NoSQL", "document"],
+...     likes: 120
+...   },
+...   {
+...     title: "nosql overview",
+...     description: "Introduction to NoSQL databases",
+...     by: "mike",
+...     url: "https://nosql.com",
+...     tags: ["NoSQL", "database"],
+...     likes: 55
+...   },
+...   {
+...     title: "nodejs basics",
+...     description: "Node.js introduction",
+...     by: "john",
+...     url: "https://nodejs.org",
+...     tags: ["JavaScript", "backend"],
+...     likes: 15
+...   },
+...   {
+...     title: "express guide",
+...     description: "Building web apps using Express",
+...     by: "alice",
+...     url: "https://expressjs.com",
+...     tags: ["Node.js", "framework"],
+...     likes: 8
+...   },
+...   {
+...     title: "react tutorial",
+...     description: "Frontend library React.js",
+...     by: "emma",
+...     url: "https://reactjs.org",
+...     tags: ["frontend", "JavaScript"],
+...     likes: 200
+...   }
+... ])
+...
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('691345221d8d692dc2b5f899'),
+    '1': ObjectId('691345221d8d692dc2b5f89a'),
+    '2': ObjectId('691345221d8d692dc2b5f89b'),
+    '3': ObjectId('691345221d8d692dc2b5f89c'),
+    '4': ObjectId('691345221d8d692dc2b5f89d')
+  }
+}
+libraryDB> db.books.insertOne({
+...   title: "mongodb advanced",
+...   description: "Deep dive into MongoDB features",
+...   by: "john",
+...   url: "https://mongodb.com/advanced",
+...   tags: ["database", "NoSQL"],
+...   likes: 90,
+...   username: "sarthak",
+...   comments: "Very useful resource for learning advanced MongoDB"
+... })
+...
+{
+  acknowledged: true,
+  insertedId: ObjectId('691345261d8d692dc2b5f89e')
+}
+libraryDB> db.books.find({ title: "mongodb" })
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  }
+]
+libraryDB> db.books.find({
+...   $or: [{ by: "john" }, { title: "mongodb" }]
+... })
+...
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  },
+  {
+    _id: ObjectId('691345261d8d692dc2b5f89e'),
+    title: 'mongodb advanced',
+    description: 'Deep dive into MongoDB features',
+    by: 'john',
+    url: 'https://mongodb.com/advanced',
+    tags: [ 'database', 'NoSQL' ],
+    likes: 90,
+    username: 'sarthak',
+    comments: 'Very useful resource for learning advanced MongoDB'
+  }
+]
+libraryDB> db.books.find({
+...   $and: [{ title: "mongodb" }, { by: "john" }]
+... })
+...
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  }
+]
+libraryDB> db.books.find({ likes: { $gt: 10 } })
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89a'),
+    title: 'nosql overview',
+    description: 'Introduction to NoSQL databases',
+    by: 'mike',
+    url: 'https://nosql.com',
+    tags: [ 'NoSQL', 'database' ],
+    likes: 55
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89d'),
+    title: 'react tutorial',
+    description: 'Frontend library React.js',
+    by: 'emma',
+    url: 'https://reactjs.org',
+    tags: [ 'frontend', 'JavaScript' ],
+    likes: 200
+  },
+  {
+    _id: ObjectId('691345261d8d692dc2b5f89e'),
+    title: 'mongodb advanced',
+    description: 'Deep dive into MongoDB features',
+    by: 'john',
+    url: 'https://mongodb.com/advanced',
+    tags: [ 'database', 'NoSQL' ],
+    likes: 90,
+    username: 'sarthak',
+    comments: 'Very useful resource for learning advanced MongoDB'
+  }
+]
+libraryDB> db.books.find({
+...   likes: { $gt: 100 },
+...   $or: [{ title: "mongodb" }, { by: "john" }]
+... })
+...
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  }
+]
+libraryDB> db.books.updateOne(
+...   { title: "mongodb" },
+...   { $set: { title: "mongodb overview" } }
+... )
+...
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+libraryDB> db.books.deleteOne({ title: "nosql overview" })
+{ acknowledged: true, deletedCount: 1 }
+libraryDB> db.books.find({ by: "john" }).limit(2)
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb overview',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  }
+]
+libraryDB> db.books.find({ by: "john" }).skip(1).limit(1)
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  }
+]
+libraryDB> db.books.find().sort({ title: 1 })
+[
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89c'),
+    title: 'express guide',
+    description: 'Building web apps using Express',
+    by: 'alice',
+    url: 'https://expressjs.com',
+    tags: [ 'Node.js', 'framework' ],
+    likes: 8
+  },
+  {
+    _id: ObjectId('691345261d8d692dc2b5f89e'),
+    title: 'mongodb advanced',
+    description: 'Deep dive into MongoDB features',
+    by: 'john',
+    url: 'https://mongodb.com/advanced',
+    tags: [ 'database', 'NoSQL' ],
+    likes: 90,
+    username: 'sarthak',
+    comments: 'Very useful resource for learning advanced MongoDB'
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f899'),
+    title: 'mongodb overview',
+    description: 'Database for modern apps',
+    by: 'john',
+    url: 'https://mongodb.com',
+    tags: [ 'database', 'NoSQL', 'document' ],
+    likes: 120
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89b'),
+    title: 'nodejs basics',
+    description: 'Node.js introduction',
+    by: 'john',
+    url: 'https://nodejs.org',
+    tags: [ 'JavaScript', 'backend' ],
+    likes: 15
+  },
+  {
+    _id: ObjectId('691345221d8d692dc2b5f89d'),
+    title: 'react tutorial',
+    description: 'Frontend library React.js',
+    by: 'emma',
+    url: 'https://reactjs.org',
+    tags: [ 'frontend', 'JavaScript' ],
+    likes: 200
+  }
+]

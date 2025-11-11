@@ -1,0 +1,145 @@
+Microsoft Windows [Version 10.0.26100.6899]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\sarth>mongosh
+Current Mongosh Log ID: 691347063b2b1ebe2eb5f898
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.5.0
+Using MongoDB:          8.0.8
+Using Mongosh:          2.5.0
+mongosh 2.5.9 is available for download: https://www.mongodb.com/try/download/shell
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-11-11T14:17:05.879+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+test> use shopDB
+... db.createCollection("orders")
+...
+switched to db shopDB
+shopDB> db.orders.insertMany([
+...   { cus_id: "A1", amount: 400, status: "P" },
+...   { cus_id: "B1", amount: 300, status: "D" },
+...   { cus_id: "A1", amount: 200, status: "F" },
+...   { cus_id: "C1", amount: 200, status: "F" },
+...   { cus_id: "B1", amount: 700, status: "P" },
+...   { cus_id: "B1", amount: 800, status: "P" }
+... ])
+...
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6913472c3b2b1ebe2eb5f899'),
+    '1': ObjectId('6913472c3b2b1ebe2eb5f89a'),
+    '2': ObjectId('6913472c3b2b1ebe2eb5f89b'),
+    '3': ObjectId('6913472c3b2b1ebe2eb5f89c'),
+    '4': ObjectId('6913472c3b2b1ebe2eb5f89d'),
+    '5': ObjectId('6913472c3b2b1ebe2eb5f89e')
+  }
+}
+shopDB> var mapFunction1 = function() {
+...   if (this.status === "P") {
+...     emit(this.cus_id, this.amount);
+...   }
+... };
+...
+
+shopDB> var reduceFunction1 = function(key, values) {
+...   return Array.sum(values);
+... };
+...
+
+shopDB> db.orders.mapReduce(
+...   mapFunction1,
+...   reduceFunction1,
+...   { out: "sum_pending" }
+... )
+...
+DeprecationWarning: Collection.mapReduce() is deprecated. Use an aggregation instead.
+See https://docs.mongodb.com/manual/core/map-reduce for details.
+{ result: 'sum_pending', ok: 1 }
+shopDB> db.sum_pending.find()
+[ { _id: 'B1', value: 1500 }, { _id: 'A1', value: 400 } ]
+shopDB> var mapFunction2 = function() {
+...   emit(this.cus_id, { sum: this.amount, count: 1 });
+... };
+...
+
+shopDB> var reduceFunction2 = function(key, values) {
+...   var result = { sum: 0, count: 0 };
+...   values.forEach(function(value) {
+...     result.sum += value.sum;
+...     result.count += value.count;
+...   });
+...   return result;
+... };
+...
+
+shopDB> var finalizeFunction2 = function(key, reducedValue) {
+...   reducedValue.avg = reducedValue.sum / reducedValue.count;
+...   return reducedValue;
+... };
+...
+
+shopDB> db.orders.mapReduce(
+...   mapFunction2,
+...   reduceFunction2,
+...   {
+...     out: "avg_amount",
+...     finalize: finalizeFunction2
+...   }
+... )
+...
+{ result: 'avg_amount', ok: 1 }
+shopDB> db.avg_amount.find()
+[
+  { _id: 'A1', value: { sum: 600, count: 2, avg: 300 } },
+  { _id: 'B1', value: { sum: 1800, count: 3, avg: 600 } },
+  { _id: 'C1', value: { sum: 200, count: 1, avg: 200 } }
+]
+shopDB> var mapFunction3 = function() {
+...   emit(this.cus_id, this.amount);
+... };
+...
+
+shopDB> var reduceFunction3 = function(key, values) {
+...   return Math.min.apply(Math, values);
+... };
+...
+
+shopDB> db.orders.mapReduce(
+...   mapFunction3,
+...   reduceFunction3,
+...   { out: "min_amount" }
+... )
+...
+{ result: 'min_amount', ok: 1 }
+shopDB> db.min_amount.find()
+[
+  { _id: 'A1', value: 200 },
+  { _id: 'B1', value: 300 },
+  { _id: 'C1', value: 200 }
+]
+shopDB> var mapFunction4 = function() {
+...   if (this.status === "F") {
+...     emit(this.cus_id, this.amount);
+...   }
+... };
+...
+
+shopDB> var reduceFunction4 = function(key, values) {
+...   return Math.max.apply(Math, values);
+... };
+...
+
+shopDB> db.orders.mapReduce(
+...   mapFunction4,
+...   reduceFunction4,
+...   { out: "max_failed" }
+... )
+...
+{ result: 'max_failed', ok: 1 }
+shopDB> db.max_failed.find()
+[ { _id: 'A1', value: 200 }, { _id: 'C1', value: 200 } ]

@@ -1,0 +1,196 @@
+Enter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.43 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE DATABASE StudentDB;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> USE StudentDB;
+Database changed
+mysql> CREATE TABLE Department (
+    ->     dept_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     DeptName VARCHAR(50) UNIQUE NOT NULL,
+    ->     HOD_Name VARCHAR(50) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> CREATE TABLE Student (
+    ->     RegID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     rollno VARCHAR(20) UNIQUE NOT NULL,
+    ->     fname VARCHAR(30) NOT NULL,
+    ->     mname VARCHAR(30),
+    ->     lname VARCHAR(30) NOT NULL,
+    ->     gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),
+    ->     dept_id INT NOT NULL,
+    ->     FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE
+    -> );
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> CREATE TABLE Course (
+    ->     CID INT PRIMARY KEY AUTO_INCREMENT,
+    ->     course_name VARCHAR(100) NOT NULL UNIQUE,
+    ->     credit INT NOT NULL CHECK (credit > 0 AND credit <= 6)
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> CREATE TABLE Enrolment (
+    ->     enid INT PRIMARY KEY AUTO_INCREMENT,
+    ->     RegID INT NOT NULL,
+    ->     DeptID INT NOT NULL,
+    ->     enroll_date DATE DEFAULT (CURRENT_DATE),
+    ->     FOREIGN KEY (RegID) REFERENCES Student(RegID)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE,
+    ->     FOREIGN KEY (DeptID) REFERENCES Department(dept_id)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE
+    -> );
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_studentdb |
++---------------------+
+| course              |
+| department          |
+| enrolment           |
+| student             |
++---------------------+
+4 rows in set (0.04 sec)
+
+mysql> DESCRIBE Department;
++----------+-------------+------+-----+---------+----------------+
+| Field    | Type        | Null | Key | Default | Extra          |
++----------+-------------+------+-----+---------+----------------+
+| dept_id  | int         | NO   | PRI | NULL    | auto_increment |
+| DeptName | varchar(50) | NO   | UNI | NULL    |                |
+| HOD_Name | varchar(50) | NO   |     | NULL    |                |
++----------+-------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+mysql> DESCRIBE Student;
++---------+-------------+------+-----+---------+----------------+
+| Field   | Type        | Null | Key | Default | Extra          |
++---------+-------------+------+-----+---------+----------------+
+| RegID   | int         | NO   | PRI | NULL    | auto_increment |
+| rollno  | varchar(20) | NO   | UNI | NULL    |                |
+| fname   | varchar(30) | NO   |     | NULL    |                |
+| mname   | varchar(30) | YES  |     | NULL    |                |
+| lname   | varchar(30) | NO   |     | NULL    |                |
+| gender  | varchar(10) | YES  |     | NULL    |                |
+| dept_id | int         | NO   | MUL | NULL    |                |
++---------+-------------+------+-----+---------+----------------+
+7 rows in set (0.00 sec)
+
+mysql> DESCRIBE Course;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| CID         | int          | NO   | PRI | NULL    | auto_increment |
+| course_name | varchar(100) | NO   | UNI | NULL    |                |
+| credit      | int          | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+mysql> DESCRIBE Enrolment;
++-------------+------+------+-----+-----------+-------------------+
+| Field       | Type | Null | Key | Default   | Extra             |
++-------------+------+------+-----+-----------+-------------------+
+| enid        | int  | NO   | PRI | NULL      | auto_increment    |
+| RegID       | int  | NO   | MUL | NULL      |                   |
+| DeptID      | int  | NO   | MUL | NULL      |                   |
+| enroll_date | date | YES  |     | curdate() | DEFAULT_GENERATED |
++-------------+------+------+-----+-----------+-------------------+
+4 rows in set (0.00 sec)
+
+mysql> ALTER TABLE Student
+    -> ADD email VARCHAR(100) UNIQUE NOT NULL;
+Query OK, 0 rows affected (0.12 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE Course
+    -> MODIFY course_name VARCHAR(120) NOT NULL UNIQUE;
+Query OK, 0 rows affected, 1 warning (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 1
+
+mysql> RENAME TABLE Enrolment TO StudentEnrollment;
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> ALTER TABLE Course
+    -> CHANGE CID course_no INT PRIMARY KEY AUTO_INCREMENT;
+ERROR 1068 (42000): Multiple primary key defined
+mysql> CREATE INDEX idx_dept_id ON Student(dept_id);
+Query OK, 0 rows affected (0.06 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_studentdb |
++---------------------+
+| course              |
+| department          |
+| student             |
+| studentenrollment   |
++---------------------+
+4 rows in set (0.00 sec)
+
+mysql> DESCRIBE Department;
++----------+-------------+------+-----+---------+----------------+
+| Field    | Type        | Null | Key | Default | Extra          |
++----------+-------------+------+-----+---------+----------------+
+| dept_id  | int         | NO   | PRI | NULL    | auto_increment |
+| DeptName | varchar(50) | NO   | UNI | NULL    |                |
+| HOD_Name | varchar(50) | NO   |     | NULL    |                |
++----------+-------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+mysql> DESCRIBE Student;
++---------+--------------+------+-----+---------+----------------+
+| Field   | Type         | Null | Key | Default | Extra          |
++---------+--------------+------+-----+---------+----------------+
+| RegID   | int          | NO   | PRI | NULL    | auto_increment |
+| rollno  | varchar(20)  | NO   | UNI | NULL    |                |
+| fname   | varchar(30)  | NO   |     | NULL    |                |
+| mname   | varchar(30)  | YES  |     | NULL    |                |
+| lname   | varchar(30)  | NO   |     | NULL    |                |
+| gender  | varchar(10)  | YES  |     | NULL    |                |
+| dept_id | int          | NO   | MUL | NULL    |                |
+| email   | varchar(100) | NO   | UNI | NULL    |                |
++---------+--------------+------+-----+---------+----------------+
+8 rows in set (0.00 sec)
+
+mysql> DESCRIBE Course;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| CID         | int          | NO   | PRI | NULL    | auto_increment |
+| course_name | varchar(120) | NO   | UNI | NULL    |                |
+| credit      | int          | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+3 rows in set (0.00 sec)
+
+mysql> DESCRIBE Enrolment;
+ERROR 1146 (42S02): Table 'studentdb.enrolment' doesn't exist
+mysql> DESCRIBE StudentEnrollment;
++-------------+------+------+-----+-----------+-------------------+
+| Field       | Type | Null | Key | Default   | Extra             |
++-------------+------+------+-----+-----------+-------------------+
+| enid        | int  | NO   | PRI | NULL      | auto_increment    |
+| RegID       | int  | NO   | MUL | NULL      |                   |
+| DeptID      | int  | NO   | MUL | NULL      |                   |
+| enroll_date | date | YES  |     | curdate() | DEFAULT_GENERATED |
++-------------+------+------+-----+-----------+-------------------+
+4 rows in set (0.00 sec)
+
+mysql>

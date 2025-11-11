@@ -1,0 +1,290 @@
+Enter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 15
+Server version: 8.0.43 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE DATABASE SalesDB;
+Query OK, 1 row affected (0.05 sec)
+
+mysql> USE SalesDB;
+Database changed
+mysql> CREATE TABLE Customer (
+    ->     customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     customer_name VARCHAR(100) NOT NULL,
+    ->     city VARCHAR(50),
+    ->     email VARCHAR(100) UNIQUE NOT NULL
+    -> );
+Query OK, 0 rows affected (0.07 sec)
+
+mysql> CREATE TABLE Product (
+    ->     product_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     product_name VARCHAR(100) NOT NULL,
+    ->     category VARCHAR(50),
+    ->     price DECIMAL(10,2) CHECK (price > 0)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> CREATE TABLE Sale (
+    ->     sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     customer_id INT NOT NULL,
+    ->     product_id INT NOT NULL,
+    ->     quantity INT CHECK (quantity > 0),
+    ->     sale_date DATE DEFAULT (CURRENT_DATE),
+    ->     total_amount DECIMAL(12,2) CHECK (total_amount >= 0),
+    ->     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE,
+    ->     FOREIGN KEY (product_id) REFERENCES Product(product_id)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> INSERT INTO Customer (customer_name, city, email) VALUES
+    -> ('Asha Patil', 'Mumbai', 'asha@sales.test'),
+    -> ('Rahul Deshmukh', 'Pune', 'rahul@sales.test'),
+    -> ('Priya Kulkarni', 'Nagpur', 'priya@sales.test'),
+    -> ('Vikram Joshi', 'Mumbai', 'vikram@sales.test');
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Product (product_name, category, price) VALUES
+    -> ('Laptop', 'Electronics', 55000.00),
+    -> ('Mobile', 'Electronics', 25000.00),
+    -> ('Chair', 'Furniture', 4500.00),
+    -> ('Table', 'Furniture', 7000.00),
+    -> ('Shoes', 'Fashion', 3000.00);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Sale (customer_id, product_id, quantity, sale_date, total_amount) VALUES
+    -> (1, 1, 1, '2025-09-10', 55000.00),
+    -> (1, 5, 2, '2025-09-20', 6000.00),
+    -> (2, 2, 1, '2025-09-15', 25000.00),
+    -> (3, 3, 3, '2025-09-22', 13500.00),
+    -> (4, 1, 1, '2025-09-25', 55000.00),
+    -> (4, 4, 1, '2025-09-28', 7000.00),
+    -> (2, 5, 2, '2025-10-02', 6000.00);
+Query OK, 7 rows affected (0.01 sec)
+Records: 7  Duplicates: 0  Warnings: 0
+
+mysql> SELECT
+    ->     c.customer_name,
+    ->     SUM(s.total_amount) AS TotalSales
+    -> FROM
+    ->     Customer c
+    ->     JOIN Sale s ON c.customer_id = s.customer_id
+    -> GROUP BY
+    ->     c.customer_name;
++----------------+------------+
+| customer_name  | TotalSales |
++----------------+------------+
+| Asha Patil     |   61000.00 |
+| Rahul Deshmukh |   31000.00 |
+| Priya Kulkarni |   13500.00 |
+| Vikram Joshi   |   62000.00 |
++----------------+------------+
+4 rows in set (0.01 sec)
+
+mysql> SELECT
+    ->     p.product_name,
+    ->     SUM(s.quantity) AS TotalQuantitySold
+    -> FROM
+    ->     Product p
+    ->     JOIN Sale s ON p.product_id = s.product_id
+    -> GROUP BY
+    ->     p.product_name;
++--------------+-------------------+
+| product_name | TotalQuantitySold |
++--------------+-------------------+
+| Laptop       |                 2 |
+| Mobile       |                 1 |
+| Chair        |                 3 |
+| Table        |                 1 |
+| Shoes        |                 4 |
++--------------+-------------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     MAX(price) AS HighestPrice,
+    ->     MIN(price) AS LowestPrice
+    -> FROM
+    ->     Product;
++--------------+-------------+
+| HighestPrice | LowestPrice |
++--------------+-------------+
+|     55000.00 |     3000.00 |
++--------------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT
+    ->     c.city,
+    ->     AVG(s.total_amount) AS AvgSales
+    -> FROM
+    ->     Customer c
+    ->     JOIN Sale s ON c.customer_id = s.customer_id
+    -> GROUP BY
+    ->     c.city;
++--------+--------------+
+| city   | AvgSales     |
++--------+--------------+
+| Mumbai | 30750.000000 |
+| Pune   | 15500.000000 |
+| Nagpur | 13500.000000 |
++--------+--------------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     p.category,
+    ->     SUM(s.total_amount) AS TotalSales,
+    ->     COUNT(s.sale_id) AS TransactionCount
+    -> FROM
+    ->     Product p
+    ->     JOIN Sale s ON p.product_id = s.product_id
+    -> GROUP BY
+    ->     p.category;
++-------------+------------+------------------+
+| category    | TotalSales | TransactionCount |
++-------------+------------+------------------+
+| Electronics |  135000.00 |                3 |
+| Furniture   |   20500.00 |                2 |
+| Fashion     |   12000.00 |                2 |
++-------------+------------+------------------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     c.customer_name,
+    ->     SUM(s.total_amount) AS TotalPurchase
+    -> FROM
+    ->     Customer c
+    ->     JOIN Sale s ON c.customer_id = s.customer_id
+    -> GROUP BY
+    ->     c.customer_name
+    -> HAVING
+    ->     SUM(s.total_amount) > (
+    ->         SELECT AVG(total_amount) FROM Sale
+    ->     );
++----------------+---------------+
+| customer_name  | TotalPurchase |
++----------------+---------------+
+| Asha Patil     |      61000.00 |
+| Rahul Deshmukh |      31000.00 |
+| Vikram Joshi   |      62000.00 |
++----------------+---------------+
+3 rows in set (0.00 sec)
+
+mysql> CREATE TEMPORARY TABLE CustomerSalesSummary AS
+    -> SELECT
+    ->     customer_id,
+    ->     SUM(total_amount) AS TotalSales
+    -> FROM
+    ->     Sale
+    -> GROUP BY
+    ->     customer_id;
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> SELECT
+    ->     c.customer_name,
+    ->     s.TotalSales
+    -> FROM
+    ->     Customer c
+    ->     JOIN CustomerSalesSummary s ON c.customer_id = s.customer_id
+    -> WHERE
+    ->     s.TotalSales > 10000;
++----------------+------------+
+| customer_name  | TotalSales |
++----------------+------------+
+| Asha Patil     |   61000.00 |
+| Rahul Deshmukh |   31000.00 |
+| Priya Kulkarni |   13500.00 |
+| Vikram Joshi   |   62000.00 |
++----------------+------------+
+4 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     p.product_name,
+    ->     COUNT(s.sale_id) AS TimesSold
+    -> FROM
+    ->     Product p
+    ->     LEFT JOIN Sale s ON p.product_id = s.product_id
+    -> GROUP BY
+    ->     p.product_name;
++--------------+-----------+
+| product_name | TimesSold |
++--------------+-----------+
+| Laptop       |         2 |
+| Mobile       |         1 |
+| Chair        |         1 |
+| Table        |         1 |
+| Shoes        |         2 |
++--------------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT DISTINCT
+    ->     c.customer_name
+    -> FROM
+    ->     Customer c
+    -> WHERE
+    ->     c.customer_id IN (
+    ->         SELECT s.customer_id
+    ->         FROM Sale s
+    ->         JOIN Product p ON s.product_id = p.product_id
+    ->         WHERE p.category = 'Electronics'
+    ->     );
++----------------+
+| customer_name  |
++----------------+
+| Asha Patil     |
+| Rahul Deshmukh |
+| Vikram Joshi   |
++----------------+
+3 rows in set (0.01 sec)
+
+mysql> SELECT * FROM Customer;
++-------------+----------------+--------+-------------------+
+| customer_id | customer_name  | city   | email             |
++-------------+----------------+--------+-------------------+
+|           1 | Asha Patil     | Mumbai | asha@sales.test   |
+|           2 | Rahul Deshmukh | Pune   | rahul@sales.test  |
+|           3 | Priya Kulkarni | Nagpur | priya@sales.test  |
+|           4 | Vikram Joshi   | Mumbai | vikram@sales.test |
++-------------+----------------+--------+-------------------+
+4 rows in set (0.00 sec)
+
+mysql> SELECT * FROM Product;
++------------+--------------+-------------+----------+
+| product_id | product_name | category    | price    |
++------------+--------------+-------------+----------+
+|          1 | Laptop       | Electronics | 55000.00 |
+|          2 | Mobile       | Electronics | 25000.00 |
+|          3 | Chair        | Furniture   |  4500.00 |
+|          4 | Table        | Furniture   |  7000.00 |
+|          5 | Shoes        | Fashion     |  3000.00 |
++------------+--------------+-------------+----------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT * FROM Sale;
++---------+-------------+------------+----------+------------+--------------+
+| sale_id | customer_id | product_id | quantity | sale_date  | total_amount |
++---------+-------------+------------+----------+------------+--------------+
+|       1 |           1 |          1 |        1 | 2025-09-10 |     55000.00 |
+|       2 |           1 |          5 |        2 | 2025-09-20 |      6000.00 |
+|       3 |           2 |          2 |        1 | 2025-09-15 |     25000.00 |
+|       4 |           3 |          3 |        3 | 2025-09-22 |     13500.00 |
+|       5 |           4 |          1 |        1 | 2025-09-25 |     55000.00 |
+|       6 |           4 |          4 |        1 | 2025-09-28 |      7000.00 |
+|       7 |           2 |          5 |        2 | 2025-10-02 |      6000.00 |
++---------+-------------+------------+----------+------------+--------------+
+7 rows in set (0.00 sec)
+
+mysql>

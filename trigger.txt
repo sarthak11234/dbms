@@ -1,0 +1,178 @@
+beforeDelete:
+
+CREATE OR REPLACE TRIGGER trg_before_delete_books
+BEFORE DELETE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, Action_Type, Action_Date)
+    VALUES (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count, 'DELETE', SYSDATE);
+END;
+/
+
+----------------------------------------------------
+afterUpdate:
+
+CREATE OR REPLACE TRIGGER trg_after_update_books
+AFTER UPDATE ON Books
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, Action_Type, Action_Date)
+    VALUES (:NEW.AccNo, :NEW.Title, :NEW.Author, :NEW.Publisher, :NEW.Count, 'UPDATE', SYSDATE);
+END;
+/
+
+---------------------------------------------------------
+
+Output:
+
+SQL> CREATE TABLE Books (
+  2      AccNo NUMBER PRIMARY KEY,
+  3      Title VARCHAR2(100),
+  4      Author VARCHAR2(50),
+  5      Publisher VARCHAR2(50),
+  6      Count NUMBER
+  7  );
+
+Table created.
+
+SQL> CREATE TABLE Library_Audit (
+  2      AccNo NUMBER,
+  3      Title VARCHAR2(100),
+  4      Author VARCHAR2(50),
+  5      Publisher VARCHAR2(50),
+  6      Count NUMBER,
+  7      Action_Type VARCHAR2(20),
+  8      Action_Date DATE
+  9  );
+
+Table created.
+
+SQL> INSERT INTO Books VALUES (101, 'Database Systems', 'Navathe', 'Pearson', 5);
+
+1 row created.
+
+SQL> INSERT INTO Books VALUES (102, 'Operating Systems', 'Galvin', 'Wiley', 3);
+
+1 row created.
+
+SQL> INSERT INTO Books VALUES (103, 'Data Structures', 'Lipschutz', 'McGraw Hill', 4);
+
+1 row created.
+
+SQL> COMMIT;
+
+Commit complete.
+
+
+SQL> @"C:\Users\sarth\OneDrive\Desktop\beforeDelete.sql"
+
+Trigger created.
+
+SQL> DELETE FROM Books WHERE AccNo = 102;
+
+1 row deleted.
+
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> SELECT * FROM Library_Audit;
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+       102
+Operating Systems
+Galvin
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+Wiley                                                       3
+DELETE               11-NOV-25
+
+
+SQL> @"C:\Users\sarth\OneDrive\Desktop\afterUpdate.sql"
+
+Trigger created.
+
+SQL> UPDATE Books
+  2  SET Count = Count + 2
+  3  WHERE AccNo = 101;
+
+1 row updated.
+
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> SELECT * FROM Library_Audit;
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+       102
+Operating Systems
+Galvin
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+Wiley                                                       3
+DELETE               11-NOV-25
+
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+       101
+Database Systems
+Navathe
+
+     ACCNO
+----------
+TITLE
+--------------------------------------------------------------------------------
+AUTHOR
+--------------------------------------------------
+PUBLISHER                                               COUNT
+-------------------------------------------------- ----------
+ACTION_TYPE          ACTION_DA
+-------------------- ---------
+Pearson                                                     9
+UPDATE               11-NOV-25

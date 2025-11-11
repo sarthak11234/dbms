@@ -1,0 +1,122 @@
+Notepad code:
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_roll_no       Borrower.Roll_no%TYPE := &Roll_no;
+    v_book_name     Borrower.NameofBook%TYPE := '&BookName';
+
+    v_date_of_issue Borrower.DateofIssue%TYPE;
+    v_status        Borrower.Status%TYPE;
+    v_days          NUMBER;
+    v_fine_amt      NUMBER := 0;
+
+    e_not_found EXCEPTION;
+
+BEGIN
+    SELECT DateofIssue, Status 
+    INTO v_date_of_issue, v_status
+    FROM Borrower
+    WHERE Roll_no = v_roll_no AND NameofBook = v_book_name;
+
+    IF v_status = 'R' THEN
+        DBMS_OUTPUT.PUT_LINE('Book already returned.');
+        RAISE e_not_found;
+    END IF;
+
+    v_days := TRUNC(SYSDATE - v_date_of_issue);
+    DBMS_OUTPUT.PUT_LINE('Number of days since issue: ' || v_days);
+
+    IF v_days > 30 THEN
+        v_fine_amt := v_days * 50;
+    ELSIF v_days BETWEEN 15 AND 30 THEN
+        v_fine_amt := v_days * 5;
+    ELSE
+        v_fine_amt := 0;
+    END IF;
+
+    UPDATE Borrower
+    SET Status = 'R'
+    WHERE Roll_no = v_roll_no AND NameofBook = v_book_name;
+
+    IF v_fine_amt > 0 THEN
+        INSERT INTO Fine (Roll_no, FineDate, Amt)
+        VALUES (v_roll_no, SYSDATE, v_fine_amt);
+        DBMS_OUTPUT.PUT_LINE('Fine of Rs ' || v_fine_amt || ' added to Fine table.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No fine applicable.');
+    END IF;
+
+    COMMIT;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No record found for given Roll number or Book name.');
+
+    WHEN e_not_found THEN
+        DBMS_OUTPUT.PUT_LINE('Custom Exception: The book was already returned.');
+
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END;
+/
+
+Output :
+
+SQL*Plus: Release 21.0.0.0.0 - Production on Mon Nov 10 12:36:52 2025
+Version 21.3.0.0.0
+
+Copyright (c) 1982, 2021, Oracle.  All rights reserved.
+
+Enter user-name: system
+Enter password:
+Last Successful login time: Wed Sep 17 2025 04:45:10 +05:30
+
+Connected to:
+Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+SQL> CREATE TABLE Borrower (
+  2      Roll_no NUMBER PRIMARY KEY,
+  3      Name VARCHAR2(50),
+  4      DateofIssue DATE,
+  5      NameofBook VARCHAR2(100),
+  6      Status CHAR(1)  -- 'I' for Issued, 'R' for Returned
+  7  );
+
+Table created.
+
+SQL> CREATE TABLE Fine (
+  2      Roll_no NUMBER,
+  3      FineDate DATE,
+  4      Amt NUMBER
+  5  );
+
+Table created.
+
+SQL> INSERT INTO Borrower VALUES (101, 'Sarthak', TO_DATE('2025-10-10', 'YYYY-MM-DD'), 'Database Systems', 'I');
+
+1 row created.
+
+SQL> INSERT INTO Borrower VALUES (102, 'Amit', TO_DATE('2025-10-20', 'YYYY-MM-DD'), 'Operating Systems', 'I');
+
+1 row created.
+
+SQL> INSERT INTO Borrower VALUES (103, 'Priya', TO_DATE('2025-09-25', 'YYYY-MM-DD'), 'DBMS Concepts', 'R');
+
+1 row created.
+
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> SET SERVEROUTPUT ON;
+
+SQL> @"C:\Users\sarth\OneDrive\Desktop\PLSQLBOOK.sql"
+Enter value for roll_no: 101
+old   2:     v_roll_no       Borrower.Roll_no%TYPE := &Roll_no;
+new   2:     v_roll_no       Borrower.Roll_no%TYPE := 101;
+Enter value for bookname: Database Systems
+old   3:     v_book_name     Borrower.NameofBook%TYPE := '&BookName';
+new   3:     v_book_name     Borrower.NameofBook%TYPE := 'Database Systems';
+Number of days since issue: 31
+Fine of Rs 1550 added to Fine table.

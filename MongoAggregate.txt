@@ -1,3 +1,28 @@
+commands used:
+
+use libraryDB;
+
+db.createCollection("books");
+
+db.books.insertMany([{ title: "mongodb overview", description: "Introduction to MongoDB", by: "john", url: "https://mongodb.com", tags: ["database", "NoSQL"], likes: 120 }, { title: "nodejs basics", description: "Node.js tutorial for beginners", by: "john", url: "https://nodejs.org", tags: ["JavaScript", "backend"], likes: 45 }, { title: "express guide", description: "Learn Express.js for backend apps", by: "mike", url: "https://expressjs.com", tags: ["framework", "Node.js"], likes: 15 }, { title: "mongodb advanced", description: "Deep dive into MongoDB features", by: "john", url: "https://mongodb.com/advanced", tags: ["NoSQL", "database"], likes: 5 }, { title: "react tutorial", description: "Frontend development using React", by: "emma", url: "https://reactjs.org", tags: ["frontend", "JavaScript"], likes: 180 }, { title: "angular guide", description: "Angular step-by-step guide", by: "john", url: "https://angular.io", tags: ["frontend", "JavaScript"], likes: 250 }]);
+
+db.books.aggregate([{ $match: { by: "john" } }, { $count: "Number_of_books_by_john" }]);
+
+db.books.aggregate([{ $match: { by: "john" } }, { $group: { _id: "$by", minLikes: { $min: "$likes" }, maxLikes: { $max: "$likes" } } }]);
+
+db.books.aggregate([{ $match: { by: "john" } }, { $group: { _id: "$by", avgLikes: { $avg: "$likes" } } }]);
+
+db.books.aggregate([{ $match: { by: "john" } }, { $sort: { title: 1 } }, { $group: { _id: "$by", firstBook: { $first: "$title" }, lastBook: { $last: "$title" } } }]);
+
+db.books.createIndex({ by: 1 });
+
+db.books.find({ by: "john" });
+
+db.books.find({ by: "john" }).explain("executionStats");
+
+
+---------------------------------------------------------------------------------------------------------------------
+
 Microsoft Windows [Version 10.0.26100.6899]
 (c) Microsoft Corporation. All rights reserved.
 
@@ -302,4 +327,5 @@ libraryDB> db.books.find({ by: "john" }).explain("executionStats")
     internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
   },
   ok: 1
+
 }

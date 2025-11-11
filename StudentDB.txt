@@ -1,3 +1,53 @@
+queries used:
+
+CREATE DATABASE StudentDB;
+
+USE StudentDB;
+
+CREATE TABLE Department (dept_id INT PRIMARY KEY AUTO_INCREMENT, DeptName VARCHAR(50) UNIQUE NOT NULL, HOD_Name VARCHAR(50) NOT NULL);
+
+CREATE TABLE Student (RegID INT PRIMARY KEY AUTO_INCREMENT, rollno VARCHAR(20) UNIQUE NOT NULL, fname VARCHAR(30) NOT NULL, mname VARCHAR(30), lname VARCHAR(30) NOT NULL, gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')), dept_id INT NOT NULL, FOREIGN KEY (dept_id) REFERENCES Department(dept_id) ON DELETE CASCADE ON UPDATE CASCADE);
+
+CREATE TABLE Course (CID INT PRIMARY KEY AUTO_INCREMENT, course_name VARCHAR(100) NOT NULL UNIQUE, credit INT NOT NULL CHECK (credit > 0 AND credit <= 6));
+
+CREATE TABLE Enrolment (enid INT PRIMARY KEY AUTO_INCREMENT, RegID INT NOT NULL, DeptID INT NOT NULL, enroll_date DATE DEFAULT (CURRENT_DATE), FOREIGN KEY (RegID) REFERENCES Student(RegID) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY (DeptID) REFERENCES Department(dept_id) ON DELETE CASCADE ON UPDATE CASCADE);
+
+SHOW TABLES;
+
+DESCRIBE Department;
+
+DESCRIBE Student;
+
+DESCRIBE Course;
+
+DESCRIBE Enrolment;
+
+ALTER TABLE Student ADD email VARCHAR(100) UNIQUE NOT NULL;
+
+ALTER TABLE Course MODIFY course_name VARCHAR(120) NOT NULL UNIQUE;
+
+RENAME TABLE Enrolment TO StudentEnrollment;
+
+-- Note: Attempted CHANGE of primary key in Course caused error (Multiple PKs) and was skipped.
+-- Command that failed: ALTER TABLE Course CHANGE CID course_no INT PRIMARY KEY AUTO_INCREMENT;
+
+CREATE INDEX idx_dept_id ON Student(dept_id);
+
+SHOW TABLES;
+
+DESCRIBE Department;
+
+DESCRIBE Student;
+
+DESCRIBE Course;
+
+-- The renamed table (StudentEnrollment) replaces Enrolment
+DESCRIBE StudentEnrollment;
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+
 Enter password: ****
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 9
@@ -192,5 +242,6 @@ mysql> DESCRIBE StudentEnrollment;
 | enroll_date | date | YES  |     | curdate() | DEFAULT_GENERATED |
 +-------------+------+------+-----+-----------+-------------------+
 4 rows in set (0.00 sec)
+
 
 mysql>

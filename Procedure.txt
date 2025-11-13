@@ -1,79 +1,70 @@
-SET SERVEROUTPUT ON;
-
-DECLARE
-    v_r   NUMBER;
-    total NUMBER;
-    nm    VARCHAR2(50);
-    gr    VARCHAR2(50);
+CREATE OR REPLACE PROCEDURE proc_Grade(
+    p_roll IN NUMBER,
+    p_name IN VARCHAR2,
+    p_marks IN NUMBER
+)
+IS
+    v_class VARCHAR2(30);
 BEGIN
-    FOR rec IN (SELECT roll_no, name, total_mark FROM student_mark) LOOP
-        v_r   := rec.roll_no;
-        nm    := rec.name;
-        total := rec.total_mark;
-        proc_grade(v_r, total, gr);
+    -- Categorization
+    IF p_marks BETWEEN 990 AND 1500 THEN
+        v_class := 'Distinction';
+    ELSIF p_marks BETWEEN 900 AND 989 THEN
+        v_class := 'First Class';
+    ELSIF p_marks BETWEEN 825 AND 899 THEN
+        v_class := 'Higher Second Class';
+    ELSE
+        v_class := 'No Category';
+    END IF;
 
-        DBMS_OUTPUT.PUT_LINE(v_r || ' ' || nm || ' ' || gr);
+    -- Insert into Result table
+    INSERT INTO Result(roll_no, name, class)
+    VALUES (p_roll, p_name, v_class);
 
-        INSERT INTO student_result(roll_no, name, grade)
-        VALUES (v_r, nm, gr);
-    END LOOP;
-
-    DBMS_OUTPUT.PUT_LINE('All records processed and inserted');
+    DBMS_OUTPUT.PUT_LINE('Inserted: ' || p_name || ' -> ' || v_class);
 END;
 /
+------------------------------------------------------------------------------------------
+
+
+CREATE TABLE Stud_Marks(
+    roll_no     NUMBER      NOT NULL,
+    name        VARCHAR2(50),
+    total_marks NUMBER,
+    CONSTRAINT stud_pk PRIMARY KEY(roll_no)
+);
 
 
 
-SQL*Plus: Release 21.0.0.0.0 - Production on Thu Sep 4 09:55:08 2025
-Version 21.3.0.0.0
+CREATE TABLE Result(
+    roll_no NUMBER,
+    name    VARCHAR2(50),
+    class   VARCHAR2(30)
+);
 
-Copyright (c) 1982, 2021, Oracle.  All rights reserved.
 
-Enter user-name: system
-Enter password:
-Last Successful login time: Thu Sep 04 2025 09:52:29 +05:30
+INSERT INTO Stud_Marks(roll_no, name, total_marks)
+VALUES (1, 'Sarthak', 1200);
 
-Connected to:
-Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
-Version 21.3.0.0.0
+INSERT INTO Stud_Marks(roll_no, name, total_marks)
+VALUES (2, 'Amit', 950);
 
-SQL> create table student_mark(roll_no int, name varchar(50), total_mark int);
+INSERT INTO Stud_Marks(roll_no, name, total_marks)
+VALUES (3, 'Riya', 860);
 
-Table created.
+INSERT INTO Stud_Marks(roll_no, name, total_marks)
+VALUES (4, 'Meera', 700);
 
-SQL> insert into student_mark values (101, 'Vedant', 580);
+COMMIT;
+-----------------------------------------------------
+SET SERVEROUTPUT ON;
 
-1 row created.
+BEGIN
+    FOR s IN (SELECT roll_no, name, total_marks FROM Stud_Marks) LOOP
+        proc_Grade(s.roll_no, s.name, s.total_marks);
+    END LOOP;
+END;
+/
+--------------------------------------------------------------
+SELECT * FROM Result;
 
-SQL> insert into student_mark values (102, 'Ayush', 300);
-
-1 row created.
-
-SQL> insert into student_mark values (103, 'Aryan', 400);
-
-1 row created.
-
-SQL> create table student_result(roll_no int, name varchar2(50), grade varchar(20));
-
-Table created.
-
-SQL> @C:\Users\System05\Documents\sqlplus\Program1.sql
-
-Procedure created.
-
-SQL> set serveroutput on
-SQL> @C:\Users\System05\Documents\sqlplus\Program2.sql
-101 Vedant 1st class with dist.
-102 Ayush 2nd class
-103 Aryan 1st class
-All records processed and inserted
-
-PL/SQL procedure successfully completed.
-
-SQL> select * from student_result;
-
-    ROLLNO NAME                 GRADE
----------- -------------------- ------------------------
-       101 Vedant               1st class with dist.
-       102 Ayush                2nd class
-       103 Aryan                1st class
